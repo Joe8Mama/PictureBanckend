@@ -10,7 +10,7 @@
       </a-layout-content>
       <a-layout-footer class="footer">
         <a href="https://tv.cctv.com/cctv14/" target="_blank">
-          雷火箭🚀 by 武田弘光
+          🚀
         </a>
       </a-layout-footer>
     </a-layout>

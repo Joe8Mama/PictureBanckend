@@ -4,8 +4,8 @@
       <a-col flex="200px">
         <router-link to="/">
           <div class="title-bar">
-            <img class="logo" src="../assets/taffy.ico" alt="logo"/>
-            <div class="title">云图库</div>
+            <img class="logo" src="../assets/logo.png" alt="logo"/>
+            <div class="title">共享图片云平台</div>
           </div>
         </router-link>
       </a-col>
@@ -63,10 +63,22 @@ const originItems = [
     title: '用户管理',
   },
   {
-    key: 'others',
-    label: h('a', { href: 'https://tv.cctv.com/cctv14/', target: '_blank' }, '雷火箭🚀'),
-    title: '雷火箭🚀',
+    key: '/add_picture',
+    label: '创建图片',
+    title: '创建图片',
   },
+  {
+    key: '/admin/pictureManage',
+    label: '图片管理',
+    title: '图片管理',
+  },
+  {
+    key: 'others',
+    label: h('a', { href: 'https://tv.cctv.com/cctv14/', target: '_blank' }, '🚀'),
+    title: '🚀',
+  },
+
+
 ]
 
 // 过滤菜单项
