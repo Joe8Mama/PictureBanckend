@@ -76,13 +76,15 @@ onMounted(() => {
     <a-row :gutter="[16, 16]">
       <!-- 图片展示区 -->
       <a-col :sm="24" :md="16" :xl="18">
-        <a-card title="图片预览">
+      <a-card title="图片预览">
+        <div style="display: grid; place-items: center; min-height: 600px;">
           <a-image
             style="max-height: 600px; object-fit: contain"
             :src="picture.url"
           />
-        </a-card>
-      </a-col>
+        </div>
+      </a-card>
+    </a-col>
       <!-- 图片信息区 -->
       <a-col :sm="24" :md="8" :xl="6">
         <a-card title="图片信息">
