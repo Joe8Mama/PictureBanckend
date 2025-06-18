@@ -64,8 +64,8 @@ const originItems = [
   },
   {
     key: '/add_picture',
-    label: '创建图片',
-    title: '创建图片',
+    label: '编辑图片',
+    title: '编辑图片',
   },
   {
     key: '/admin/pictureManage',
@@ -73,7 +73,7 @@ const originItems = [
     title: '图片管理',
   },
   {
-    key: 'others',
+    key: '/',
     label: h('a', { href: 'https://tv.cctv.com/cctv14/', target: '_blank' }, '🚀'),
     title: '🚀',
   },

@@ -3,25 +3,39 @@ package com.example.demo.model.dto.picture;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
+/**
+ * 审核请求
+ */
 @Data
-public class PictureUploadRequest implements Serializable {
+public class PictureReviewRequest implements Serializable {
 
     /**
-     * 图片 id（用于修改）
+     * id
      */
     private Long id;
 
     /**
-     * 图片 url
+     * 状态：0-待审核; 1-通过; 2-拒绝
      */
-    private String url;
+    private Integer reviewStatus;
+
+    /**
+     * 审核信息
+     */
+    private String reviewMessage;
 
     /**
      * 图片名称
      */
-    private String picName;
+    private String name;
+
+    /**
+     * 简介
+     */
+    private String introduction;
 
     /**
      * 分类

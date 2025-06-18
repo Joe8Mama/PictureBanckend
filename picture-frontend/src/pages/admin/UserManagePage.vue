@@ -36,7 +36,17 @@
           {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
         <template v-else-if="column.key === 'action'">
-          <a-button danger @click="doDelete(record.id)">删除</a-button>
+          <a-popconfirm
+            title="确认要执行该操作吗？"
+            ok-text="是"
+            cancel-text="否"
+            @confirm="doDelete(record.id)"
+            @cancel=""
+          >
+            <a-button danger class="bordered-btn">
+              删除
+            </a-button>
+          </a-popconfirm>
         </template>
       </template>
 

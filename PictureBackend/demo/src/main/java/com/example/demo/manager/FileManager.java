@@ -27,6 +27,10 @@ import java.util.List;
 @Slf4j
 @Service
 @Component
+@Deprecated
+/**
+ * 文件管理器
+ */
 public class FileManager {
     @Resource
     private CosClientConfig cosClientConfig;

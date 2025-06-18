@@ -1,27 +1,30 @@
 package com.example.demo.model.dto.picture;
 
+import jdk.jfr.Category;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * 批量导入图片请求
+ */
 @Data
-public class PictureUploadRequest implements Serializable {
+public class PictureUploadByBatchRequest implements Serializable {
+    /**
+     * 搜索词
+     */
+    private String searchText;
 
     /**
-     * 图片 id（用于修改）
+     * 抓取数量
      */
-    private Long id;
+    private Integer count = 10;
 
     /**
-     * 图片 url
+     * 名称前缀
      */
-    private String url;
-
-    /**
-     * 图片名称
-     */
-    private String picName;
+    private String namePrefix;
 
     /**
      * 分类
@@ -35,3 +38,6 @@ public class PictureUploadRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 }
+
+
+
