@@ -6,6 +6,7 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
+import com.example.demo.constant.LoadConst;
 import com.example.demo.exception.BusinessException;
 import com.example.demo.exception.ErrorCode;
 import com.example.demo.exception.ThrowUtils;
@@ -65,7 +66,7 @@ public class UrlPictureUpload extends PictureUploadTemplate {
             // 文件存在，文件类型校验
             String contentType = httpResponse.header("Content-Type");
             if (StrUtil.isNotBlank(contentType)) {
-                final List<String> ALLOW_CONTENT_TYPES = Arrays.asList("image/jpeg", "image/png", "image/gif", "image/webp");
+                final List<String> ALLOW_CONTENT_TYPES = Arrays.asList("image/jpeg", "image/png", "image/gif", "image/webp", "image/avif");
                 if (!ALLOW_CONTENT_TYPES.contains(contentType)) {
                     log.info("文件格式错误 : {}", contentType);
                     throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件格式错误");
@@ -76,7 +77,7 @@ public class UrlPictureUpload extends PictureUploadTemplate {
             if (StrUtil.isNotBlank(contentLengthStr)) {
                 try {
                     long contentLength = Long.parseLong(contentLengthStr);
-                    final long MAX_FILE_SIZE = 1024 * 1024 * 9;
+                    final long MAX_FILE_SIZE = 1024 * 1024 * LoadConst.UPLOAD_MAX_SIZES;
                     ThrowUtils.throwIf(contentLength > MAX_FILE_SIZE, ErrorCode.PARAMS_ERROR, "文件大小不能超过9M");
                 } catch (NumberFormatException e) {
                     throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小格式异常");

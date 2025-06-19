@@ -1,5 +1,6 @@
 package com.example.demo.manager.upload;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -11,7 +12,9 @@ import com.example.demo.manager.CosManager;
 import com.example.demo.model.dto.file.UploadPictureResult;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.PutObjectResult;
+import com.qcloud.cos.model.ciModel.persistence.CIObject;
 import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
+import com.qcloud.cos.model.ciModel.persistence.ProcessResults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 图片上传模板
@@ -59,6 +63,18 @@ public abstract class PictureUploadTemplate {
             PutObjectResult putObjectResult = cosManager.putPictureObject(uploadPath, file);
             // 获取图片信息对象
             ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
+            // 获取到图片处理结果
+            ProcessResults processResults = putObjectResult.getCiUploadResult().getProcessResults();
+            List<CIObject> objectList = processResults.getObjectList();
+            if (CollUtil.isNotEmpty(objectList)) {
+                // 封装压缩图的返回结果
+                CIObject compressCiObject = objectList.get(0);
+                CIObject thumbnailCiObject = compressCiObject;
+                if (objectList.size() > 1) {
+                    thumbnailCiObject = objectList.get(1);
+                }
+                return buildResult(originalFilename, compressCiObject, thumbnailCiObject);
+            }
             return buildResult(originalFilename, file, uploadPath, imageInfo);
         } catch (Exception e) {
             log.error("图片上传到对象存储失败", e);
@@ -71,7 +87,36 @@ public abstract class PictureUploadTemplate {
     }
 
     /**
-     * 构建返回对象
+     * 封装返回对象
+     * @param originalFilename 原始文件名
+     * @param compressCiObject 压缩图对象
+     * @param thumbnailCiObject  缩略图对象
+     * @return 返回对象
+     */
+    private UploadPictureResult buildResult(String originalFilename, CIObject compressCiObject, CIObject thumbnailCiObject) {
+        // 计算宽高
+        int pictureWidth = compressCiObject.getWidth();
+        int pictureHeight = compressCiObject.getHeight();
+        double pictureScale = NumberUtil.round(pictureWidth * 1.0 / pictureHeight, 2).doubleValue();
+        // 封装并返回结果
+        UploadPictureResult uploadPictureResult = new UploadPictureResult();
+        // 设置压缩后的图片路径
+        uploadPictureResult.setUrl(cosClientConfig.getHost() + "/" + compressCiObject.getKey());
+        uploadPictureResult.setPicName(FileUtil.mainName(originalFilename));
+        uploadPictureResult.setPicSize(compressCiObject.getSize().longValue());
+        uploadPictureResult.setPicWidth(pictureWidth);
+        uploadPictureResult.setPicHeight(pictureHeight);
+        uploadPictureResult.setPicScale(pictureScale);
+        uploadPictureResult.setPicFormat(compressCiObject.getFormat());
+        // 设置缩略图路径
+        uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + thumbnailCiObject.getKey());
+
+        // 返回文件路径
+        return uploadPictureResult;
+    }
+
+    /**
+     * 封装返回对象
      * @param imageInfo 图片信息对象
      * @param uploadPath 上传路径
      * @param originalFilename 原始文件名

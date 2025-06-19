@@ -2,6 +2,10 @@ server:
   port: 8123
   servlet:
     context-path: /api
+    # cookie 30 天后过期
+    session:
+      cookie:
+        max-age: 2592000
 spring:
   application:
     name: picture-backend
@@ -11,7 +15,18 @@ spring:
     url: jdbc:mysql://localhost:3306/picture_backend
     username: root
     password: 123456
-    #  文件上传配置
+  # Redis 配置
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    timeout: 5000
+  # Session配置
+  session:
+    store-type: redis
+    # session 30 天后过期
+    timeout: 2592000
+    # 文件上传配置
   servlet:
     multipart:
       max-file-size: 10MB

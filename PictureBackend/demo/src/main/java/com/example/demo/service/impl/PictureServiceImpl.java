@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.exception.BusinessException;
 import com.example.demo.exception.ErrorCode;
 import com.example.demo.exception.ThrowUtils;
+import com.example.demo.manager.CosManager;
 import com.example.demo.manager.FileManager;
 import com.example.demo.manager.upload.FilePictureUpload;
 import com.example.demo.manager.upload.PictureUploadTemplate;
@@ -34,6 +35,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -61,6 +63,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
     @Resource
     UserService userService;
+
+    @Resource
+    CosManager cosManager;
 
 
     /**
@@ -106,6 +111,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 构造要入库的图片信息
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());
+        picture.setThumbnailUrl(uploadPictureResult.getThumbnailUrl());
         // 支持外层抓取名称
         String picName = uploadPictureResult.getPicName();
         if (pictureUploadRequest != null && StrUtil.isNotBlank(pictureUploadRequest.getPicName())) {
@@ -409,6 +415,35 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             }
         }
         return uploadCount;
+    }
+
+    /**
+     * 清理图片文件
+     * @param oldPicture  图片
+     */
+    @Async // 异步执行
+    @Override
+    public void clearPictureFile(Picture oldPicture) {
+        log.info("开始清理图片文件, url = {}", oldPicture.getUrl());
+        // 判断该图片是否被多条记录使用
+        String pictureUrl = oldPicture.getUrl();
+        long count = this.lambdaQuery()
+                .eq(Picture::getUrl, pictureUrl)
+                .count();
+        // 如果被多条记录使用，则不删除
+        if (count > 1) {
+            log.info("图片被多条记录使用，不删除, url = {}", pictureUrl);
+            return;
+        }
+        // 删除图片文件
+        cosManager.deleteObject(pictureUrl);
+        log.info("图片文件已删除, url = {}", pictureUrl);
+        // 删除缩略图
+        String thumbnailUrl = oldPicture.getThumbnailUrl();
+        if (StrUtil.isNotBlank(thumbnailUrl)) {
+            cosManager.deleteObject(thumbnailUrl);
+            log.info("缩略图已删除, url = {}", thumbnailUrl);
+        }
     }
 }
 

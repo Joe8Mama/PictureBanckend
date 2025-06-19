@@ -14,7 +14,7 @@ const searchParams = reactive<API.PictureQueryRequest>({
   current: 1,
   pageSize: 15,
   sortField: 'createTime',
-  sortOrder: 'descend',
+  sortOrder: 'ascend',
 })
 
 // 分页参数
@@ -147,7 +147,7 @@ onMounted(() => {
              <img
                style="height: 180px; object-fit: cover"
                :alt="picture.name"
-               :src="picture.url"
+               :src="picture.thumbnailUrl ?? picture.url"
              />
            </template>
            <a-card-meta :title="picture.name">

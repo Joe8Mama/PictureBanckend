@@ -1,6 +1,7 @@
 package com.example.demo.manager.upload;
 
 import cn.hutool.core.io.FileUtil;
+import com.example.demo.constant.LoadConst;
 import com.example.demo.exception.ErrorCode;
 import com.example.demo.exception.ThrowUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -38,11 +39,11 @@ public class FilePictureUpload extends PictureUploadTemplate {
         // 1. 校验文件大小
         long fileSize = multipartFile.getSize();
         final long ONE_M = 1024 * 1024;
-        ThrowUtils.throwIf(fileSize > 9 * ONE_M, ErrorCode.PARAMS_ERROR, "文件大小不能超过9M");
+        ThrowUtils.throwIf(fileSize > LoadConst.UPLOAD_MAX_SIZES * ONE_M, ErrorCode.PARAMS_ERROR, "文件大小不能超过9M");
         // 2. 校验文件后缀
         String fileSuffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
         // 允许上传的文件后缀列表
-        final List<String> ALLOW_FORMAT_LIST = Arrays.asList("png", "jpg", "jpeg", "webp");
+        final List<String> ALLOW_FORMAT_LIST = Arrays.asList("png", "jpg", "jpeg", "webp", "avif");
         ThrowUtils.throwIf(!ALLOW_FORMAT_LIST.contains(fileSuffix), ErrorCode.PARAMS_ERROR, "文件格式错误，只允许上传png、jpg、jpeg、webp格式的文件");
 
     }
