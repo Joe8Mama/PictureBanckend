@@ -95,7 +95,6 @@ public class CosManager {
      * @param key 唯一键
      */
     public void deleteObject(String key) {
-        GetObjectRequest getObjectRequest = new GetObjectRequest(cosClientConfig.getBucket(), key);
         cosClient.deleteObject(cosClientConfig.getBucket(), key);
     }
 

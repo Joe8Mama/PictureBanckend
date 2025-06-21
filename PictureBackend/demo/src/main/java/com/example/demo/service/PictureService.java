@@ -2,10 +2,7 @@ package com.example.demo.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.demo.model.dto.picture.PictureQueryRequest;
-import com.example.demo.model.dto.picture.PictureReviewRequest;
-import com.example.demo.model.dto.picture.PictureUploadByBatchRequest;
-import com.example.demo.model.dto.picture.PictureUploadRequest;
+import com.example.demo.model.dto.picture.*;
 import com.example.demo.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.demo.model.entity.User;
@@ -14,7 +11,6 @@ import com.example.demo.model.vo.PictureVO;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @author 16130
  * @description 针对表【picture(图片)】的数据库操作Service
  * @createDate 2025-06-15 23:04:39
  */
@@ -98,6 +94,30 @@ public interface PictureService extends IService<Picture> {
      * @param picture  图片
      */
     void clearPictureFile(Picture picture);
+
+    /**
+     * 删除图片
+     *
+     * @param pictureId 图片id
+     * @param loginUser 登录用户
+     */
+    void deletePicture(long pictureId, User loginUser);
+
+    /**
+     * 编辑图片
+     *
+     * @param pictureEditRequest 图片编辑请求
+     * @param loginUser 登录用户
+     */
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+
+    /**
+     * 检查图片权限
+     *
+     * @param loginUser 登录用户
+     * @param picture   图片
+     */
+    void checkPictureAuth(User loginUser, Picture picture);
 }
 
 

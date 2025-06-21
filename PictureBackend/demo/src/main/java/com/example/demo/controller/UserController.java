@@ -9,10 +9,12 @@ import com.example.demo.constant.UserConstant;
 import com.example.demo.exception.BusinessException;
 import com.example.demo.exception.ErrorCode;
 import com.example.demo.exception.ThrowUtils;
+import com.example.demo.model.dto.space.SpaceAddRequest;
 import com.example.demo.model.dto.user.*;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.vo.LoginUserVO;
 import com.example.demo.model.vo.UserVO;
+import com.example.demo.service.SpaceService;
 import com.example.demo.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +29,9 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private SpaceService spaceService;
     /**
      * 用户注册
      */
@@ -37,6 +42,11 @@ public class UserController {
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
         long result = userService.userRegister(userAccount, userPassword, checkPassword);
+//        // todo
+//        // 5. 创建私有空间
+//        SpaceAddRequest spaceAddRequest = new SpaceAddRequest();
+//        User newUser = userService.getById(result);
+//        long spaceId = spaceService.addSpace(spaceAddRequest, newUser);
         return ResultUtils.success(result);
     }
 

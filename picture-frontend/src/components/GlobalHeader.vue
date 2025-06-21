@@ -27,6 +27,13 @@
                     <LogoutOutlined />
                     退出登录
                   </a-menu-item>
+                  <a-menu-item>
+                    <router-link to="/my_space">
+                      <UserOutlined />
+                      我的空间
+                    </router-link>
+                  </a-menu-item>
+
                 </a-menu>
               </template>
             </a-dropdown>
@@ -47,6 +54,7 @@ import { MenuProps, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import { userLogoutUsingPost } from '@/api/userController.ts'
+import AddSpacePage from '@/pages/AddSpacePage.vue'
 
 const loginUserStore = useLoginUserStore()
 
@@ -73,6 +81,11 @@ const originItems = [
     title: '图片管理',
   },
   {
+    key: '/admin/spaceManage',
+    label: '空间管理',
+    title: '空间管理',
+  },
+  {
     key: '/',
     label: h('a', { href: 'https://tv.cctv.com/cctv14/', target: '_blank' }, '🚀'),
     title: '🚀',
@@ -82,17 +95,18 @@ const originItems = [
 ]
 
 // 过滤菜单项
-const filterMenus = (menus = [] as MenuProps['items']) => {
+const filterMenus = (menus = []) => {
   return menus?.filter((menu) => {
-    if (menu.key.startsWith('/admin')) {
-      const loginUser = loginUserStore.loginUser
+    // 先检查 menu.key 是否存在
+    if (menu.key && menu.key.startsWith("/admin")) {
+      const loginUser = loginUserStore.loginUser;
       if (!loginUser || loginUser.userRole !== "admin") {
-        return false
+        return false;
       }
     }
-    return true
-  })
-}
+    return true;
+  });
+};
 
 // 展示在菜单的路由数组
 const items = computed<MenuProps['items']>(() => filterMenus(originItems))

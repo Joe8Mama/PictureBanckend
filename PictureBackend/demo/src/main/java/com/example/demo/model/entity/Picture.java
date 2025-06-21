@@ -2,6 +2,7 @@ package com.example.demo.model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import lombok.Data;
@@ -13,7 +14,7 @@ import lombok.Data;
  */
 @TableName(value = "picture")
 @Data
-public class Picture {
+public class Picture implements Serializable {
     /**
      * id
      */
@@ -99,6 +100,11 @@ public class Picture {
      * 创建用户 id
      */
     private Long userId;
+
+    /**
+     * 空间 id
+     */
+    private Long spaceId;
 
     /**
      * 创建时间

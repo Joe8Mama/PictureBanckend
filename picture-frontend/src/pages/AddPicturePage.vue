@@ -5,15 +5,18 @@
     <h2 style="margin-bottom: 16px">
       {{ route.query?.id ? '修改图片' : '创建图片' }}
     </h2>
+    <a-typography-paragraph v-if="spaceId" type="secondary">
+      上传至空间：<a :href="`/space/${spaceId}`" target="_blank">{{ spaceId }}</a>
+    </a-typography-paragraph>
     <!-- 选择上传方式 -->
     <a-tabs v-model:activeKey="uploadType">
       <a-tab-pane key="file" tab="文件上传">
         <!-- 图片上传组件 -->
-        <PictureUpload :picture="picture"  :onSuccess="onSuccess" />
+        <PictureUpload :picture="picture" :sapceId = spaceId :onSuccess="onSuccess" />
       </a-tab-pane>
       <a-tab-pane key="url" tab="URL 上传" force-render>
         <!-- URL 图片上传组件 -->
-        <UrlPictureUpload :picture="picture"  :onSuccess="onSuccess" />
+        <UrlPictureUpload :picture="picture" :sapceId = spaceId :onSuccess="onSuccess" />
       </a-tab-pane>
     </a-tabs>
     <a-form layout="vertical" :model="pictureForm" @finish="handleSubmit">
@@ -46,7 +49,7 @@
           allowClear
         />
       </a-form-item>
-      <a-form v-if="picture" layout="vertical" :model="pictureForm"@finish="handleSubmit">
+      <a-form v-if="picture" layout="vertical" :model="pictureForm" @finish="handleSubmit">
       </a-form>
       <a-form-item>
         <a-button type="primary" html-type="submit" style="width: 100%"> {{ route.query?.id ? '修改' : '创建' }}</a-button>
@@ -62,7 +65,7 @@
 
 
 import PictureUpload from '@/components/PictureUpload.vue'
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   editPictureUsingPost,
@@ -99,6 +102,7 @@ const handleSubmit = async (values: any) => {
   }
   const res = await editPictureUsingPost({
     id: pictureId,
+    spaceId: spaceId.value,
     ...values,
   })
   if (res.data.code === 0 && res.data.data) {
@@ -137,6 +141,7 @@ const getTagCategoryOptions = async () => {
   }
 }
 
+
 onMounted(() => {
   getTagCategoryOptions()
 })
@@ -166,6 +171,10 @@ onMounted(() => {
   getOldPicture()
 })
 
+// 空间 id
+const spaceId = computed(() => {
+  return route.query?.spaceId
+})
 
 
 </script>

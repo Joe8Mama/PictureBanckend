@@ -104,7 +104,7 @@
               @confirm="handleReview(record, PIC_REVIEW_STATUS_ENUM.REJECT)"
               @cancel="cancel"
             >
-              <a-button danger class="bordered-btn">
+              <a-button danger>
                 拒绝
               </a-button>
             </a-popconfirm>
@@ -126,7 +126,7 @@
               @confirm="doDelete(record.id)"
               @cancel="cancel"
             >
-              <a-button danger class="bordered-btn">
+              <a-button danger>
                 删除
               </a-button>
             </a-popconfirm>
@@ -259,7 +259,8 @@ const doDelete = async (id : number) => {
 // 获取数据
 const fetchData = async () => {
   const res = await listPictureByPageUsingPost({
-    ...searchParams
+    ...searchParams,
+    nullSpaceId: true,
   })
   if (res.data.data) {
     dataList.value = res.data.data.records ?? []
@@ -321,13 +322,13 @@ onMounted(() => {
   text-overflow: ellipsis;
 }
 .bordered-btn {
-  border: 1px solid #d9d9d9;
-  background-color: white;
-  color: rgba(0, 0, 0, 0.85);
+  border-color: #1890ff;
+  color: #1890ff;
 }
 
 .bordered-btn:hover {
-  border-color: #1890ff;
+  border-color: #4fabff;
+  color: #4fabff;
 }
 
 .bordered-btn.danger {

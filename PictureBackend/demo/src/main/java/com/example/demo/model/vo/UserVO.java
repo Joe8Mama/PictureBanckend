@@ -4,13 +4,14 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * 录用户视图（脱敏）
  */
 @Data
-public class UserVO {
+public class UserVO implements Serializable {
     /**
      * id
      */

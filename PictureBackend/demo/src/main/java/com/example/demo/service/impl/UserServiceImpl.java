@@ -8,18 +8,24 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.constant.UserConstant;
 import com.example.demo.exception.BusinessException;
 import com.example.demo.exception.ErrorCode;
+import com.example.demo.exception.ThrowUtils;
+import com.example.demo.model.dto.space.SpaceAddRequest;
+import com.example.demo.model.dto.space.SpaceQueryRequest;
 import com.example.demo.model.dto.user.UserQueryRequest;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.enums.UserRoleEnum;
 import com.example.demo.model.vo.LoginUserVO;
 import com.example.demo.model.vo.UserVO;
+import com.example.demo.service.SpaceService;
 import com.example.demo.service.UserService;
 import com.example.demo.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.file.FileSystemAlreadyExistsException;
 import java.util.ArrayList;
@@ -35,7 +41,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     implements UserService{
-
+    
     /**
      * 用户注册
      * @param userAccount   用户账户
@@ -77,6 +83,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (!save) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
         }
+        log.info("用户注册成功，用户ID = {}", user.getId());
         return user.getId();
     }
 
