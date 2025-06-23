@@ -9,6 +9,7 @@ import com.example.demo.model.entity.User;
 import com.example.demo.model.vo.PictureVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @description 针对表【picture(图片)】的数据库操作Service
@@ -118,6 +119,24 @@ public interface PictureService extends IService<Picture> {
      * @param picture   图片
      */
     void checkPictureAuth(User loginUser, Picture picture);
+
+    /**
+     * 根据空间id和颜色查询图片
+     *
+     * @param spaceId   空间id
+     * @param picColor  颜色
+     * @param loginUser 登录用户
+     * @return 图片列表
+     */
+    List<PictureVO> searchPictureByColor(Long spaceId, String picColor, User loginUser);
+
+    /**
+     * 编辑图片（批量）
+     *
+     * @param pictureEditByBatchRequest 图片编辑（批量）请求
+     * @param loginUser                 登录用户
+     */
+    void editPictureByBatch(PictureEditByBatchRequest pictureEditByBatchRequest, User loginUser);
 }
 
 

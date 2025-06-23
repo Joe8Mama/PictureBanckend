@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, h, onMounted, ref } from 'vue'
 import { deletePictureUsingPost, getPictureVoByIdUsingGet } from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
-import { downloadImage, formatSize } from '../utils'
+import { downloadImage, formatSize } from '@/utils'
 import router from '@/router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
-
+import ShareModal from '@/components/ShareModal.vue'
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  ShareAltOutlined,
+} from '@ant-design/icons-vue'
 const props = defineProps<{
   id: string | number
 }>()
@@ -73,6 +79,29 @@ const doDownload = () => {
   downloadImage(picture.value.url)
 }
 
+function toHexColor(input) {
+  // 去掉 0x 前缀
+  const colorValue = input.startsWith('0x') ? input.slice(2) : input
+
+  // 将剩余部分解析为十六进制数，再转成 6 位十六进制字符串
+  const hexColor = parseInt(colorValue, 16).toString(16).padStart(6, '0')
+
+  // 返回标准 #RRGGBB 格式
+  return `#${hexColor}`
+}
+
+// ----- 分享操作 ----
+const shareModalRef = ref()
+// 分享链接
+const shareLink = ref<string>()
+// 分享
+const doShare = () => {
+  shareLink.value = `${window.location.protocol}//${window.location.host}/picture/${picture.id}`
+  if (shareModalRef.value) {
+    shareModalRef.value.openModal()
+  }
+}
+
 onMounted(() => {
   fetchPictureDetail()
 })
@@ -132,34 +161,43 @@ onMounted(() => {
             <a-descriptions-item label="大小">
               {{ formatSize(picture.picSize) }}
             </a-descriptions-item>
+            <a-descriptions-item label="主色调">
+              <a-space>
+                {{ picture.picColor ?? '-' }}
+                <div
+                  v-if="picture.picColor"
+                  :style="{
+                    backgroundColor: toHexColor(picture.picColor),
+                    width: '16px',
+                    height: '16px',
+                  }"
+                />
+              </a-space>
+            </a-descriptions-item>
           </a-descriptions>
           <!-- 图片操作 -->
           <a-space wrap>
             <a-button type="primary" @click="doDownload">
-              下载
+              免费下载
               <template #icon>
                 <DownloadOutlined />
               </template>
             </a-button>
-            <a-button v-if="canEdit" type="default" @click="doEdit">
-              编辑
-              <template #icon>
-                <EditOutlined />
-              </template>
+            <a-button :icon="h(ShareAltOutlined)" type="primary" ghost @click="doShare">
+              分享
             </a-button>
-            <a-button v-if="canEdit" danger @click="doDelete">
+            <a-button v-if="canEdit" :icon="h(EditOutlined)" type="default" @click="doEdit">
+              编辑
+            </a-button>
+            <a-button v-if="canEdit" :icon="h(DeleteOutlined)" danger @click="doDelete">
               删除
-              <template #icon>
-                <DeleteOutlined />
-              </template>
             </a-button>
           </a-space>
         </a-card>
       </a-col>
     </a-row>
+    <ShareModal ref="shareModalRef" :link="shareLink" />
   </div>
-
-
 </template>
 
 <style scoped>

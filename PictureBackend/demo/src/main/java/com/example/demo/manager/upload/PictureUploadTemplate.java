@@ -10,6 +10,8 @@ import com.example.demo.exception.BusinessException;
 import com.example.demo.exception.ErrorCode;
 import com.example.demo.manager.CosManager;
 import com.example.demo.model.dto.file.UploadPictureResult;
+import com.example.demo.utils.ColorSimilarUtils;
+import com.example.demo.utils.ColorTransformUtils;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.CIObject;
@@ -73,7 +75,7 @@ public abstract class PictureUploadTemplate {
                 if (objectList.size() > 1) {
                     thumbnailCiObject = objectList.get(1);
                 }
-                return buildResult(originalFilename, compressCiObject, thumbnailCiObject);
+                return buildResult(originalFilename, compressCiObject, thumbnailCiObject, imageInfo);
             }
             return buildResult(originalFilename, file, uploadPath, imageInfo);
         } catch (Exception e) {
@@ -91,9 +93,10 @@ public abstract class PictureUploadTemplate {
      * @param originalFilename 原始文件名
      * @param compressCiObject 压缩图对象
      * @param thumbnailCiObject  缩略图对象
+     * @param imageInfo 图片信息对象
      * @return 返回对象
      */
-    private UploadPictureResult buildResult(String originalFilename, CIObject compressCiObject, CIObject thumbnailCiObject) {
+    private UploadPictureResult buildResult(String originalFilename, CIObject compressCiObject, CIObject thumbnailCiObject, ImageInfo imageInfo) {
         // 计算宽高
         int pictureWidth = compressCiObject.getWidth();
         int pictureHeight = compressCiObject.getHeight();
@@ -108,6 +111,8 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setPicHeight(pictureHeight);
         uploadPictureResult.setPicScale(pictureScale);
         uploadPictureResult.setPicFormat(compressCiObject.getFormat());
+        String aveColor = ColorTransformUtils.getStandardColor(imageInfo.getAve());
+        uploadPictureResult.setPicColor(aveColor);
         // 设置缩略图路径
         uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + thumbnailCiObject.getKey());
 
@@ -137,6 +142,7 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setPicHeight(pictureHeight);
         uploadPictureResult.setPicScale(pictureScale);
         uploadPictureResult.setPicFormat(imageInfo.getFormat());
+        uploadPictureResult.setPicColor(imageInfo.getAve());
 
         // 返回文件路径
         return uploadPictureResult;

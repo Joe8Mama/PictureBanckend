@@ -11,6 +11,18 @@ declare namespace API {
     message?: string
   }
 
+  type BaseResponseListImageSearchResult_ = {
+    code?: number
+    data?: ImageSearchResult[]
+    message?: string
+  }
+
+  type BaseResponseListPictureVO_ = {
+    code?: number
+    data?: PictureVO[]
+    message?: string
+  }
+
   type BaseResponseListSpaceLevel_ = {
     code?: number
     data?: SpaceLevel[]
@@ -141,6 +153,11 @@ declare namespace API {
     id?: number
   }
 
+  type ImageSearchResult = {
+    fromUrl?: string
+    thumbUrl?: string
+  }
+
   type LoginUserVO = {
     createTime?: string
     editTime?: string
@@ -201,6 +218,7 @@ declare namespace API {
     introduction?: string
     isDelete?: number
     name?: string
+    picColor?: string
     picFormat?: string
     picHeight?: number
     picScale?: number
@@ -218,17 +236,27 @@ declare namespace API {
     userId?: number
   }
 
+  type PictureEditByBatchRequest = {
+    category?: string
+    nameRule?: string
+    pictureIdList?: number[]
+    spaceId?: number
+    tags?: string[]
+  }
+
   type PictureEditRequest = {
     category?: string
     id?: number
     introduction?: string
     name?: string
+    spaceId?: number
     tags?: string[]
   }
 
   type PictureQueryRequest = {
     category?: string
     current?: number
+    endEditTime?: string
     id?: number
     introduction?: string
     name?: string
@@ -246,6 +274,7 @@ declare namespace API {
     sortField?: string
     sortOrder?: string
     spaceId?: number
+    startEditTime?: string
     tags?: string[]
     userId?: number
   }
@@ -297,6 +326,7 @@ declare namespace API {
     id?: number
     introduction?: string
     name?: string
+    picColor?: string
     picFormat?: string
     picHeight?: number
     picScale?: number
@@ -309,6 +339,15 @@ declare namespace API {
     url?: string
     user?: UserVO
     userId?: number
+  }
+
+  type SearchPictureByColorRequest = {
+    picColor?: string
+    spaceId?: number
+  }
+
+  type SearchPictureByPictureRequest = {
+    pictureId?: number
   }
 
   type Space = {

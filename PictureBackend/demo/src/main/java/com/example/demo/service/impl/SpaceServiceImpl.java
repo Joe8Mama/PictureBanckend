@@ -17,14 +17,15 @@ import com.example.demo.model.entity.Space;
 import com.example.demo.model.entity.Space;
 import com.example.demo.model.entity.User;
 import com.example.demo.model.enums.SpaceLevelEnum;
+import com.example.demo.model.vo.*;
 import com.example.demo.model.vo.SpaceVO;
 import com.example.demo.model.vo.SpaceVO;
-import com.example.demo.model.vo.SpaceVO;
-import com.example.demo.model.vo.UserVO;
+import com.example.demo.service.PictureService;
 import com.example.demo.service.SpaceService;
 import com.example.demo.mapper.SpaceMapper;
 import com.example.demo.service.UserService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionManager;
@@ -55,7 +56,11 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
     @Resource
     private TransactionTemplate transactionTemplate;
 
+
     private Map<Long, Object> lockMap = new ConcurrentHashMap<>();
+
+//    @Autowired
+//    private SpaceService spaceService;
 
     /**
      * 添加空间
@@ -207,6 +212,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
             }
         }
     }
+
 }
 
 

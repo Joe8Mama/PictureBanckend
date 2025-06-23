@@ -30,6 +30,14 @@
               </template>
             </a-card-meta>
             <template v-if="showOp" #actions>
+              <a-space @click="(e) => doShare(picture, e)">
+                <share-alt-outlined />
+                分享
+              </a-space>
+              <a-space @click="(e) => doSearch(picture, e)">
+                <search-outlined />
+                搜索
+              </a-space>
               <a-space @click="(e) => doEdit(picture, e)">
                 <edit-outlined />
                 编辑
@@ -63,6 +71,7 @@ import { deletePictureUsingPost } from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
 // import ShareModal from '@/component/ShareModal.vue'
 import { ref } from 'vue'
+import ShareModal from '@/components/ShareModal.vue'
 
 interface Props {
   dataList?: API.PictureVO[]
@@ -96,6 +105,7 @@ const doSearch = (picture, e) => {
   // 打开新的页面
   window.open(`/search_picture?pictureId=${picture.id}`)
 }
+
 
 // 编辑
 const doEdit = (picture, e) => {

@@ -4,6 +4,9 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.demo.annotation.AuthCheck;
+import com.example.demo.api.imagesearch.ImageSearchApiFacade;
+import com.example.demo.api.imagesearch.model.ImageSearchResult;
+import com.example.demo.api.imagesearch.sub.GetImageFirstUrlApi;
 import com.example.demo.common.BaseResponse;
 import com.example.demo.common.DeleteRequest;
 import com.example.demo.common.ResultUtils;
@@ -374,6 +377,42 @@ public class PictureController {
         User loginUser = userService.getLoginUser(request);
         Integer uploadCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
         return ResultUtils.success(uploadCount);
+    }
+
+    /**
+     * 以图搜图
+     */
+    @PostMapping("/search/picture")
+    public BaseResponse<List<ImageSearchResult>> searchPictureByPicture(@RequestBody SearchPictureByPictureRequest searchPictureByPictureRequest) {
+        ThrowUtils.throwIf(searchPictureByPictureRequest == null, ErrorCode.PARAMS_ERROR, "搜索图片请求参数为空");
+        Long pictureId = searchPictureByPictureRequest.getPictureId();
+        ThrowUtils.throwIf(pictureId == null, ErrorCode.PARAMS_ERROR, "图片ID为空");
+        Picture picture = pictureService.getById(pictureId);
+        ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
+        String imageUrl = picture.getUrl() + "?imageMogr2/format/png";
+        List<ImageSearchResult> imageSearchResults = ImageSearchApiFacade.searchImage(imageUrl);
+        return ResultUtils.success(imageSearchResults);
+    }
+
+    @PostMapping("/search/color")
+    public BaseResponse<List<PictureVO>> searchPictureByColor(@RequestBody SearchPictureByColorRequest searchPictureByColorRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(searchPictureByColorRequest == null, ErrorCode.PARAMS_ERROR, "搜索图片请求参数为空");
+        String picColor = searchPictureByColorRequest.getPicColor();
+        Long spaceId = searchPictureByColorRequest.getSpaceId();
+        User loginUser = userService.getLoginUser(request);
+        List<PictureVO> pictureVOList = pictureService.searchPictureByColor(spaceId, picColor, loginUser);
+        return ResultUtils.success(pictureVOList);
+    }
+
+    /**
+     * 批量编辑图片
+     */
+    @PostMapping("/edit/batch")
+    public BaseResponse<Boolean> editPictureByBatch(@RequestBody PictureEditByBatchRequest pictureEditByBatchRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(pictureEditByBatchRequest == null, ErrorCode.PARAMS_ERROR, "批量编辑图片请求参数为空");
+        User loginUser = userService.getLoginUser(request);
+        pictureService.editPictureByBatch(pictureEditByBatchRequest, loginUser);
+        return ResultUtils.success(true);
     }
 
 }

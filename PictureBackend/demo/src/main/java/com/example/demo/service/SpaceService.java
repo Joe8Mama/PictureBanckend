@@ -7,9 +7,11 @@ import com.example.demo.model.dto.space.SpaceQueryRequest;
 import com.example.demo.model.entity.Space;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.demo.model.entity.User;
+import com.example.demo.model.vo.PictureVO;
 import com.example.demo.model.vo.SpaceVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @description 针对表【space(空间)】的数据库操作Service

@@ -7,6 +7,7 @@
         <a-button type="primary" :href="`/add_picture?spaceId=${id}`" target="_blank">
           + 创建图片
         </a-button>
+        <a-button :icon="h(EditOutlined)" @click="doBatchEdit"> 批量编辑</a-button>
         <a-tooltip
           :title="`占用空间 ${formatSize(space.totalSize)} / ${formatSize(space.maxSize)}`"
         >
@@ -19,15 +20,28 @@
       </a-space>
     </a-flex>
     <div style="margin-bottom: 16px" />
+    <!-- 搜索表单 -->
+    <PictureSearchForm :onSearch="onSearch" />
+    <div style="margin-bottom: 16px" />
+    <!-- 按颜色搜索，跟其他搜索条件独立 -->
+    <a-form-item label="按颜色搜索">
+      <color-picker format="hex3" @pureColorChange="onColorChange" />
+    </a-form-item>
     <!-- 图片列表 -->
     <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData"/>
+    <!-- 分页 -->
     <a-pagination
       style="text-align: right"
       v-model:current="searchParams.current"
       v-model:pageSize="searchParams.pageSize"
       :total="total"
-      :show-total="() => `图片总数 ${total} / ${space.maxCount}`"
       @change="onPageChange"
+    />
+    <BatchEditPictureModal
+      ref="batchEditPictureModalRef"
+      :spaceId="id"
+      :pictureList="dataList"
+      :onSuccess="onBatchEditPictureSuccess"
     />
 
   </div>
@@ -37,9 +51,14 @@
 import PictureList from '@/components/PictureList.vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
 import { message } from 'ant-design-vue'
-import { onMounted, reactive, ref } from 'vue'
-import { listPictureVoByPageUsingPost } from '@/api/pictureController.ts'
+import { h, onMounted, reactive, ref } from 'vue'
+import { listPictureVoByPageUsingPost, searchPictureByColorUsingPost } from '@/api/pictureController.ts'
 import { formatSize } from '@/utils'
+import PictureSearchForm from '@/components/PictureSearchForm.vue'
+import { ColorPicker } from 'vue3-colorpicker'
+import "vue3-colorpicker/style.css";
+import BatchEditPictureModal from '@/components/BatchEditPictureModal.vue'
+import { EditOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps<{
   id: string | number
@@ -62,6 +81,14 @@ const fetchSpaceDetail = async () => {
   }
 }
 
+// 分享弹窗引用
+const batchEditPictureModalRef = ref()
+
+// 批量编辑成功后，刷新数据
+const onBatchEditPictureSuccess = () => {
+  fetchData()
+}
+
 onMounted(() => {
   fetchSpaceDetail()
 })
@@ -72,7 +99,7 @@ const total = ref(0)
 const loading = ref(true)
 
 // 搜索条件
-const searchParams = reactive<API.PictureQueryRequest>({
+const searchParams = ref<API.PictureQueryRequest>({
   current: 1,
   pageSize: 12,
   sortField: 'createTime',
@@ -81,8 +108,25 @@ const searchParams = reactive<API.PictureQueryRequest>({
 
 // 分页参数
 const onPageChange = (page, pageSize) => {
-  searchParams.current = page
-  searchParams.pageSize = pageSize
+  searchParams.value.current = page
+  searchParams.value.pageSize = pageSize
+  fetchData()
+}
+
+// 打开批量编辑弹窗
+const doBatchEdit = () => {
+  if (batchEditPictureModalRef.value) {
+    batchEditPictureModalRef.value.openModal()
+  }
+}
+
+// 搜索
+const onSearch = (newSearchParams: API.PictureQueryRequest) => {
+  searchParams.value = {
+    ...searchParams.value,
+    ...newSearchParams,
+    current: 1,
+  }
   fetchData()
 }
 
@@ -92,12 +136,29 @@ const fetchData = async () => {
   // 转换搜索参数
   const params = {
     spaceId: props.id,
-    ...searchParams,
+    ...searchParams.value,
   }
   const res = await listPictureVoByPageUsingPost(params)
   if (res.data.data) {
     dataList.value = res.data.data.records ?? []
     total.value = res.data.data.total ?? 0
+  } else {
+    message.error('获取数据失败，' + res.data.message)
+  }
+  loading.value = false
+}
+
+// 按照颜色搜索
+const onColorChange = async (color: string) => {
+  loading.value = true
+  const res = await searchPictureByColorUsingPost({
+    picColor: color,
+    spaceId: props.id,
+  })
+  if (res.data.code === 0 && res.data.data) {
+    const data = res.data.data ?? []
+    dataList.value = data
+    total.value = data.length
   } else {
     message.error('获取数据失败，' + res.data.message)
   }
@@ -114,5 +175,8 @@ onMounted(() => {
 <style scoped>
 #spaceDetailPage {
   margin-bottom: 16px;
+}
+.picture-search-form .ant-form-item {
+  margin-top: 16px;
 }
 </style>
