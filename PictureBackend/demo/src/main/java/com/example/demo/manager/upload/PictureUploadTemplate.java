@@ -73,7 +73,8 @@ public abstract class PictureUploadTemplate {
                 CIObject compressCiObject = objectList.get(0);
                 CIObject thumbnailCiObject = compressCiObject;
                 if (objectList.size() > 1) {
-                    thumbnailCiObject = objectList.get(1);
+                    thumbnailCiObject = objectList.get(0);
+                    compressCiObject = objectList.get(1);
                 }
                 return buildResult(originalFilename, compressCiObject, thumbnailCiObject, imageInfo);
             }

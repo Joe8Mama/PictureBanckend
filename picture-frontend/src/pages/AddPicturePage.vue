@@ -2,6 +2,7 @@
 
 <template>
   <div id="addPicturePage">
+    <ImageCropper imageUrl="https://www.codefather.cn/logo.png"/>
     <h2 style="margin-bottom: 16px">
       {{ route.query?.id ? '修改图片' : '创建图片' }}
     </h2>
@@ -19,6 +20,51 @@
         <UrlPictureUpload :picture="picture" :sapceId = spaceId :onSuccess="onSuccess" />
       </a-tab-pane>
     </a-tabs>
+    <!-- 图片编辑 -->
+    <div v-if="picture" class="edit-bar">
+      <a-space size="middle">
+        <a-button :icon="h(EditOutlined)" @click="doEditPicture">编辑图片</a-button>
+        <a-button type="primary" :icon="h(FullscreenOutlined)" @click="doImagePainting">
+          AI 扩图
+        </a-button>
+        <!-- 图片限制提示按钮 -->
+        <a-button type="link" size="small" @click="showImageConstraints">
+          <a-icon type="info-circle" /> 图像限制
+        </a-button>
+      </a-space>
+      <!-- 图片限制弹窗 -->
+      <a-modal
+        v-model:visible="constraintsModalVisible"
+        title="图像限制条件"
+        @cancel="constraintsModalVisible = false"
+      >
+        <div class="constraints-content">
+          <ul class="constraints-list">
+            <li>图像格式：JPG、JPEG、PNG、HEIF、WEBP。</li>
+            <li>图像大小：不超过10MB。</li>
+            <li>图像分辨率：不低于512×512像素且不超过4096×4096像素。</li>
+            <li>图像单边长度范围：[512, 4096]，单位像素。</li>
+          </ul>
+          <div class="constraints-tip" style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #f0f0f0; color: #999;">
+            <p>不符合要求的图片可能导致处理失败或效果不佳，请确保您的图片满足上述条件。</p>
+          </div>
+        </div>
+      </a-modal>
+      <ImageCropper
+        ref="imageCropperRef"
+        :imageUrl="picture?.url"
+        :picture="picture"
+        :spaceId="spaceId"
+        :space="space"
+        :onSuccess="onCropSuccess"
+      />
+      <ImageOutPainting
+        ref="imageOutPaintingRef"
+        :picture="picture"
+        :spaceId="spaceId"
+        :onSuccess="onImageOutPaintingSuccess"
+      />
+    </div>
     <a-form layout="vertical" :model="pictureForm" @finish="handleSubmit">
       <a-form-item label="名称" name="name">
         <a-input v-model:value="pictureForm.name" placeholder="请输入名称" />
@@ -55,8 +101,13 @@
         <a-button type="primary" html-type="submit" style="width: 100%"> {{ route.query?.id ? '修改' : '创建' }}</a-button>
       </a-form-item>
     </a-form>
-
-
+    <ImageCropper
+      ref="imageCropperRef"
+      :imageUrl="picture?.url"
+      :picture="picture"
+      :spaceId="spaceId"
+      :onSuccess="onSuccess"
+    />
   </div>
 
 </template>
@@ -65,7 +116,7 @@
 
 
 import PictureUpload from '@/components/PictureUpload.vue'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, h, onMounted, reactive, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   editPictureUsingPost,
@@ -74,9 +125,14 @@ import {
 } from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
+import ImageCropper from '@/components/ImageCropper.vue'
+import { EditOutlined, FullscreenOutlined, InfoCircleOutlined} from '@ant-design/icons-vue'
+import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
+import ImageOutPainting from '@/components/ImageOutPainting.vue'
 
 interface Props {
   picture?: API.PictureVO
+  spaceId?: number
   onSuccess?: (newPicture: API.PictureVO) => void
 }
 const uploadType = ref<'file' | 'url'>('file')
@@ -88,9 +144,13 @@ const onSuccess = (newPicture: API.PictureVO) => {
   pictureForm.name = newPicture.name
 }
 
-
+// 模态框显示状态
+const constraintsModalVisible = ref(false);
 const router = useRouter()
-
+// 显示图片限制弹窗
+const showImageConstraints = () => {
+  constraintsModalVisible.value = true;
+};
 /**
  * 提交表单
  * @param values
@@ -166,6 +226,33 @@ const getOldPicture = async () => {
     }
   }
 }
+// 图片编辑弹窗引用
+const imageCropperRef = ref()
+
+// 编辑图片
+const doEditPicture = () => {
+  if (imageCropperRef.value) {
+    imageCropperRef.value.openModal()
+  }
+}
+
+// 编辑成功事件
+const onCropSuccess = (newPicture: API.PictureVO) => {
+  picture.value = newPicture
+}
+
+// ----- AI 扩图引用 -----
+const imageOutPaintingRef = ref()
+
+// 打开 AI 扩图弹窗
+const doImagePainting = async () => {
+  imageOutPaintingRef.value?.openModal()
+}
+
+// AI 扩图保存事件
+const onImageOutPaintingSuccess = (newPicture: API.PictureVO) => {
+  picture.value = newPicture
+}
 
 onMounted(() => {
   getOldPicture()
@@ -175,7 +262,25 @@ onMounted(() => {
 const spaceId = computed(() => {
   return route.query?.spaceId
 })
+// 获取空间信息
+const space = ref<API.SpaceVO>()
 
+// 获取空间信息
+const fetchSpace = async () => {
+  // 获取数据
+  if (spaceId.value) {
+    const res = await getSpaceVoByIdUsingGet({
+      id: spaceId.value,
+    })
+    if (res.data.code === 0 && res.data.data) {
+      space.value = res.data.data
+    }
+  }
+}
+
+watchEffect(() => {
+  fetchSpace()
+})
 
 </script>
 
@@ -184,5 +289,24 @@ const spaceId = computed(() => {
   max-width: 720px;
   margin: 0 auto;
 }
+#addPicturePage .edit-bar {
+  text-align: center;
+  margin: 16px 0;
+}
+.constraints-content {
+  padding: 0 24px 24px;
+}
 
+.constraints-list {
+  padding-left: 20px;
+  color: #666;
+}
+
+.constraints-list li {
+  margin-bottom: 8px;
+}
+
+.constraints-tip {
+  font-size: 14px;
+}
 </style>

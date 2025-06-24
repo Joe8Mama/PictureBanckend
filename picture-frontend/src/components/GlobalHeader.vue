@@ -54,6 +54,7 @@ import { MenuProps, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import { userLogoutUsingPost } from '@/api/userController.ts'
+import { LogoutOutlined, UserOutlined} from '@ant-design/icons-vue'
 import AddSpacePage from '@/pages/AddSpacePage.vue'
 
 const loginUserStore = useLoginUserStore()

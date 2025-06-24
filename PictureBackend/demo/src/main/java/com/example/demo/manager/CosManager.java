@@ -1,23 +1,28 @@
 package com.example.demo.manager;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.http.HttpRequest;
 import com.example.demo.config.CosClientConfig;
 import com.example.demo.constant.LoadConst;
+import com.example.demo.exception.BusinessException;
+import com.example.demo.exception.ErrorCode;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.demo.PicOperationDemo;
-import com.qcloud.cos.model.COSObject;
-import com.qcloud.cos.model.GetObjectRequest;
-import com.qcloud.cos.model.PutObjectRequest;
-import com.qcloud.cos.model.PutObjectResult;
+import com.qcloud.cos.http.HttpMethodName;
+import com.qcloud.cos.model.*;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
 
+@Slf4j
 @Component
 public class CosManager {
     @Resource
@@ -64,12 +69,12 @@ public class CosManager {
 
         // 图片处理规则列表
         List<PicOperations.Rule> rules = new ArrayList<>();
-        // 图片压缩（转成 avif 格式）
-        String avifKey = FileUtil.mainName(key) + ".avif";
+        // 图片压缩（转成 webp 格式）
+        String webpKey = FileUtil.mainName(key) + ".webp";
         PicOperations.Rule compressRule = new PicOperations.Rule();
-        compressRule.setFileId(avifKey);
+        compressRule.setFileId(webpKey);
         compressRule.setBucket(cosClientConfig.getBucket());
-        compressRule.setRule("imageMogr2/format/avif");
+        compressRule.setRule("imageMogr2/format/webp");
         rules.add(compressRule);
         // 仅对>80kB的图片进行压缩
         if (file.length() > 80 * 1024) {
@@ -98,5 +103,52 @@ public class CosManager {
         cosClient.deleteObject(cosClientConfig.getBucket(), key);
     }
 
+    public String getPresignedUrl(String imageUrl) {
+        try {
+            // 从完整URL中解析对象键
+            //String objectKey = extractObjectKey(imageUrl);
+            log.info("原始URL: {}", imageUrl);
+            String objectKey = imageUrl;
+
+            // 设置签名过期时间(30分钟)
+            Date expirationDate = new Date(System.currentTimeMillis() + 30 * 60 * 1000);
+
+            // 生成预签名URL
+            URL url = cosClient.generatePresignedUrl(
+                    cosClientConfig.getBucket(),  // 存储桶名称
+                    objectKey,                    // 对象键
+                    expirationDate,               // 过期时间
+                    HttpMethodName.GET
+            );
+
+            log.info("预签名URL: {}", url);
+            return url.toString();
+        } catch (Exception e) {
+            log.error("生成预签名URL失败，原始URL: {}", imageUrl, e);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "生成预签名URL失败");
+        }
+    }
+
+    /**
+     * 从完整COS URL中提取对象键
+     */
+    private String extractObjectKey(String imageUrl) {
+        // 示例URL: https://picbackend01-1331768829.cos.ap-shanghai.myqcloud.com/public/1933555623843966978/2025-06-19_izcfy0ox12xa.avif
+
+        // 移除协议头和域名部分
+        int domainEndIndex = imageUrl.indexOf(".myqcloud.com/");
+        if (domainEndIndex == -1) {
+            throw new IllegalArgumentException("无效的COS URL格式");
+        }
+
+        // 提取对象键部分
+        return imageUrl.substring(domainEndIndex + ".myqcloud.com/".length());
+    }
+
+    public String getObjectUrl(String key) {
+        int doaminIndex = key.indexOf('?');
+        String url = key.substring(0, doaminIndex);
+        return url;
+    }
 
 }

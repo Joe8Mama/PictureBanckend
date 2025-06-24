@@ -9,6 +9,9 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.demo.api.aliyunai.AliYunAiApi;
+import com.example.demo.api.aliyunai.model.CreateOutPaintingTaskRequest;
+import com.example.demo.api.aliyunai.model.CreateOutPaintingTaskResponse;
 import com.example.demo.common.ResultUtils;
 import com.example.demo.exception.BusinessException;
 import com.example.demo.exception.ErrorCode;
@@ -37,6 +40,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -76,6 +80,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
 
     @Resource
     private TransactionTemplate transactionTemplate;
+    @Autowired
+    private AliYunAiApi aliYunAiApi;
 
     /**
      * 上传图片
@@ -669,6 +675,32 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         // 5. 批量更新数据库
         boolean result = this.updateBatchById(pictureList);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "批量更新图片失败");
+    }
+
+    /**
+     * 创建AI扩图任务
+     * @param createPictureOutPaintingTaskRequest 创建图片外绘任务请求
+     * @param loginUser                           登录用户
+     * @return 创建图片外绘任务响应
+     */
+    @Override
+    public CreateOutPaintingTaskResponse createPictureOutPaintingTask(CreatePictureOutPaintingTaskRequest createPictureOutPaintingTaskRequest, User loginUser) {
+        // 获取图片信息
+        Long pictureId = createPictureOutPaintingTaskRequest.getPictureId();
+        Picture picture = this.getById(pictureId);
+        ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
+        // 校验权限
+        checkPictureAuth(loginUser, picture);
+        // 创建任务
+        CreateOutPaintingTaskRequest createOutPaintingTaskRequest = new CreateOutPaintingTaskRequest();
+        CreateOutPaintingTaskRequest.Input input = new CreateOutPaintingTaskRequest.Input();
+        // todo
+        //String url = cosManager.getPresignedUrl(picture.getUrl());
+        //url = cosManager.getObjectUrl(url);
+        input.setImageUrl(picture.getUrl());
+        createOutPaintingTaskRequest.setInput(input);
+        createOutPaintingTaskRequest.setParameters(createPictureOutPaintingTaskRequest.getParameters());
+        return aliYunAiApi.createOutPaintingTask(createOutPaintingTaskRequest);
     }
 
     /**
