@@ -12,6 +12,7 @@ import com.example.demo.constant.UserConstant;
 import com.example.demo.exception.BusinessException;
 import com.example.demo.exception.ErrorCode;
 import com.example.demo.exception.ThrowUtils;
+import com.example.demo.manager.auth.SpaceUserAuthManager;
 import com.example.demo.model.dto.space.*;
 import com.example.demo.model.entity.Picture;
 import com.example.demo.model.entity.Space;
@@ -20,11 +21,13 @@ import com.example.demo.model.enums.SpaceLevelEnum;
 import com.example.demo.model.vo.SpaceVO;
 import com.example.demo.service.PictureService;
 import com.example.demo.service.SpaceService;
+import com.example.demo.service.SpaceUserService;
 import com.example.demo.service.UserService;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.DigestUtils;
@@ -52,6 +55,9 @@ public class SpaceController {
 
     @Resource
     private PictureService pictureService;
+    @Autowired
+    private SpaceUserAuthManager spaceUserAuthManager;
+
 
     /**
      * 获取空间分类列表
@@ -168,8 +174,12 @@ public class SpaceController {
         // 查询数据库
         Space space = spaceService.getById(id);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+        SpaceVO spaceVO = spaceService.getSpaceVO(space, request);
+        User loginUser = userService.getLoginUser(request);
+        List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
+        spaceVO.setPermissionList(permissionList);
         // 获取封装类
-        return ResultUtils.success(spaceService.getSpaceVO(space, request));
+        return ResultUtils.success(spaceVO);
     }
 
     /**

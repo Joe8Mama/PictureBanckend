@@ -127,8 +127,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
             Picture oldPicture = this.getById(pictureId);
             ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
             // 仅本人或管理员可编辑
-            ThrowUtils.throwIf(!oldPicture.getUserId().equals(loginUser.getId())
-                    && !userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR, "无操作权限");
+//            ThrowUtils.throwIf(!oldPicture.getUserId().equals(loginUser.getId())
+//                    && !userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR, "无操作权限");
             // 校验空间是否一致
             // 没传spaceId，复用原图的spaceId
             if (spaceId == null) {
@@ -525,7 +525,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Picture oldPicture = this.getById(pictureId);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
         // 校验权限
-        checkPictureAuth(loginUser, oldPicture);
+        // 改为注解鉴权
+        //pictureService.checkPictureAuth(loginUser, picture);
         // 开启事务
         Long finalSpaceId = oldPicture.getSpaceId();
         transactionTemplate.execute(status -> {
@@ -567,7 +568,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Picture oldPicture = this.getById(id);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "未找到该图片");
         // 校验权限
-        this.checkPictureAuth(loginUser, oldPicture);
+        // 改为注解鉴权
+        //pictureService.checkPictureAuth(loginUser, picture);
         // 补充审核参数
         this.fillReviewParams(picture, loginUser);
         // 操作数据库
@@ -690,7 +692,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         Picture picture = this.getById(pictureId);
         ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
         // 校验权限
-        checkPictureAuth(loginUser, picture);
+        // 改为注解鉴权
+        //pictureService.checkPictureAuth(loginUser, picture);
         // 创建任务
         CreateOutPaintingTaskRequest createOutPaintingTaskRequest = new CreateOutPaintingTaskRequest();
         CreateOutPaintingTaskRequest.Input input = new CreateOutPaintingTaskRequest.Input();

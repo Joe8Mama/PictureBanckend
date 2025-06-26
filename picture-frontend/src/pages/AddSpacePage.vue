@@ -26,7 +26,7 @@
     <!-- 空间介绍 -->
     <a-card title="空间介绍">
       <a-typography-paragraph>
-        * 个人用户仅能拥有一个私有空间 *
+        * 个人用户仅能拥有一个私有空间，普通用户仅能创建普通级别空间 *
 <!--        <a href="https://tv.cctv.com/cctv14/" target="_blank">🚀</a>-->
       </a-typography-paragraph>
       <a-typography-paragraph v-for="spaceLevel in spaceLevelList">
@@ -50,9 +50,12 @@ import { useRoute, useRouter } from 'vue-router'
 import {SPACE_LEVEL_MAP, SPACE_LEVEL_OPTIONS, SPACE_TYPE_ENUM, SPACE_TYPE_MAP} from '@/constant/space.ts'
 import { formatSize } from '../utils'
 
+
 const space = ref<API.SpaceVO>()
 const spaceForm = reactive<API.SpaceAddRequest | API.SpaceEditRequest>({})
 const loading = ref(false)
+
+
 
 const route = useRoute()
 // 空间类别，默认为私有空间
