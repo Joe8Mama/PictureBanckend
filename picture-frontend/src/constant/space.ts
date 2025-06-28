@@ -21,7 +21,6 @@ export const SPACE_LEVEL_OPTIONS = Object.keys(SPACE_LEVEL_MAP).map((key) => {
   }
 })
 
-
 // 空间类型枚举
 export const SPACE_TYPE_ENUM = {
   PRIVATE: 0,
@@ -30,7 +29,7 @@ export const SPACE_TYPE_ENUM = {
 
 // 空间类型文本映射
 export const SPACE_TYPE_MAP: Record<number, string> = {
-  0: '个人空间',
+  0: '私有空间',
   1: '团队空间',
 }
 
