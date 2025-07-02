@@ -18,7 +18,7 @@
       :columns="columns"
       :data-source="dataList"
       :pagination="pagination"
-      @chahge="doTableChange"
+      @change="doTableChange"
     >
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'userAvatar'">
