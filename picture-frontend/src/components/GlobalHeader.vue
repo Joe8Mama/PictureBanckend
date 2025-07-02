@@ -33,7 +33,10 @@
                       我的空间
                     </router-link>
                   </a-menu-item>
-
+                  <a-menu-item @click="doPaste">
+                      <share-alt-outlined />
+                      复制UID
+                  </a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
@@ -56,7 +59,7 @@ import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import { userLogoutUsingPost } from '@/api/userController.ts'
 import { LogoutOutlined, UserOutlined} from '@ant-design/icons-vue'
 import AddSpacePage from '@/pages/AddSpacePage.vue'
-
+import { ShareAltOutlined } from '@ant-design/icons-vue'
 const loginUserStore = useLoginUserStore()
 
 const originItems = [
@@ -141,6 +144,23 @@ const doLogout = async () => {
     message.error('退出登录失败，' + res.data.message)
   }
 }
+
+const copyUserIdToClipboard = async () => {
+  if (!loginUserStore.loginUser?.id) {
+    return false;
+  }
+  const userId = loginUserStore.loginUser.id.toString();
+  await navigator.clipboard.writeText(userId);
+  return true;
+};
+//复制UID
+const doPaste = async () => {
+  if (await copyUserIdToClipboard()) {
+    message.success('用户ID已复制');
+  } else {
+    message.error('复制失败');
+  }
+};
 </script>
 
 <style scoped>

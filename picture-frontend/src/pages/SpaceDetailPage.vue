@@ -23,7 +23,7 @@
           成员管理
         </a-button>
         <a-button
-          v-if="canManageSpaceUser"
+          v-if="canManageSpaceAnalyze"
           type="primary"
           ghost
           :icon="h(BarChartOutlined)"
@@ -94,6 +94,8 @@ import 'vue3-colorpicker/style.css'
 import BatchEditPictureModal from '@/components/BatchEditPictureModal.vue'
 import { BarChartOutlined, EditOutlined, TeamOutlined } from '@ant-design/icons-vue'
 import { SPACE_PERMISSION_ENUM, SPACE_TYPE_MAP } from '../constant/space.ts'
+import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
+const loginUserStore = useLoginUserStore()
 
 interface Props {
   id: string | number
@@ -109,8 +111,23 @@ function createPermissionChecker(permission: string) {
   })
 }
 
+// 成员管理检查函数
+function createManageSpacePermissionChecker(permission: string) {
+  return computed(() => {
+    return ((space.value.permissionList ?? []).includes(permission) && space.value.spaceType == 1)
+  })
+}
+
+// 空间分析检查函数
+function createAnalyzePermissionChecker(permission: string) {
+  return computed(() => {
+    return (loginUserStore.loginUser.id == space.value.userId || loginUserStore.loginUser.userRole == "admin")
+  })
+}
+
 // 定义权限检查
-const canManageSpaceUser = createPermissionChecker(SPACE_PERMISSION_ENUM.SPACE_USER_MANAGE)
+const canManageSpaceUser = createManageSpacePermissionChecker(SPACE_PERMISSION_ENUM.SPACE_USER_MANAGE)
+const canManageSpaceAnalyze = createAnalyzePermissionChecker(SPACE_PERMISSION_ENUM.SPACE_USER_MANAGE)
 const canUploadPicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_UPLOAD)
 const canEditPicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_EDIT)
 const canDeletePicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_DELETE)

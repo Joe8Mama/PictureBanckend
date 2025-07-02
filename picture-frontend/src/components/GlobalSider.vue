@@ -74,6 +74,7 @@ const fetchTeamSpaceList = async () => {
   const res = await listMyTeamSpaceUsingPost()
   if (res.data.code === 0 && res.data.data) {
     teamSpaceList.value = res.data.data
+    teamSpaceList.value = teamSpaceList.value.filter(item => item.space !== null);
   } else {
     message.error('加载我的团队空间失败，' + res.data.message)
   }
